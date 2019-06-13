@@ -54,7 +54,7 @@ def joinn(m):
 def startgame(m):
     if m.chat.id in games:
         game=games[m.chat.id]
-        if len(game['players'])>1:
+        if len(game['players'])>1 and game['started']==False:
             game['started']=True
             lst=''
             for ids in game['players']:
