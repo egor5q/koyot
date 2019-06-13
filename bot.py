@@ -67,7 +67,23 @@ def startgame(m):
             t=threading.Thread(target=gostart, args=[game])
             t.start()
             
-            
+@bot.message_handler(commands=['delgame'])
+def delgamee(m):
+  try:
+    user=bot.get_chat_member(m.chat.id, m.from_user.id)       
+    if user['status']=='creator' or user['status']=='administrator':
+        if m.chat.id in games:
+            try:
+                games[m.chat.id]['timer'].cancel()
+            except:
+                pass
+            del games[m.chat.id]
+            bot.send_message(m.chat.id, 'Игра была удалена администратором '+m.from_user.first_name+'!')
+
+  except:
+    bot.send_message(441399484, traceback.format_exc())
+
+
 def gostart(game):
     try:
         turnnumbers=[]
