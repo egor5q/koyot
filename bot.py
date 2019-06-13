@@ -12,11 +12,204 @@ import traceback
 token = os.environ['TELEGRAM_TOKEN']
 bot = telebot.TeleBot(token)
 
+games={}
 
-client=MongoClient(os.environ['database'])
-db=client.
-users=db.users
+#client=MongoClient(os.environ['database'])
+#db=client.
+#users=db.users 
 
+
+allfeathers=['-10', '-5', '-5', '3', '1', '1', '0', '3', '7', '6', '2', '8', '?', '3', 'max-', '10', '20', '5', 'max0', '4', 
+            '9', '2', '10', '10', 'x2', '4', '2', '1', '5', '15']
+
+@bot.message_handler(commands=['coyote'])
+def coyotestart(m):
+    if m.chat.id not in games:
+        games.update(creategame(m.chat.id, m))
+        bot.send_message(m.chat.id, 'Идёт набор в игру! Жми /cjoin для присоединения.')
+    else:
+        bot.send_message(m.chat.id, 'Игра уже идёт! Жми /cjoin!')
+
+
+@bot.message_handler(commands=['cjoin'])
+def joinn(m):
+    if m.chat.id in games:
+        if m.from_user.id not in games[m.chat.id]['players']:
+            game=games[m.chat.id]
+            if len(game['players'])<=len(allfeathers)-5:
+                if game['started']==False:
+                    try:
+                        bot.send_message(m.from_user.id, 'Вы присоединились!')
+                        games[m.chat.id]['players'].update(createplayer(m))
+                        bot.send_message(m.chat.id, m.from_user.first_name+' присоединился!')
+                    except:
+                        bot.send_message(m.chat.id, 'Сначала надо написать мне в личку (@Coyotegamebot) хоть что-то!')
+            else:
+                bot.send_message(m.chat.id, 'Слишком много игроков!')
+    else:
+        bot.send_message(m.chat.id, 'Нет запущенной игры! /coyote для запуска.')
+   
+
+@bot.message_handler(commands=['cstart'])
+def startgame(m):
+    if m.chat.id in games:
+        game=games[m.chat.id]
+        if len(game['players'])>1:
+            game['started']=True
+            gostart(game)
+            lst=''
+            for ids in game['players']:
+                if game['players'][ids]['uname']!=None:
+                    lst+=game['players'][ids]['uname']+'\n'
+                else:
+                    lst+=game['players'][ids]['name']+'\n'
+            bot.send_message(game['id'], 'Каждый из игроков получил число! Каждый из вас видит числа остальных, но не видит своего числа!')
+            bot.send_message(game['id'], 'Список игроков:\n'+lst)
+            
+            
+def gostart(game):
+    turnnumbers=[]
+    i=1
+    while i<=len(game['players']):
+        turnnumbers.append(i)
+        i+=1
+    for ids in game['players']:
+        x=random.choice(turnnumbers)
+        game['players']['turnnumber']=x
+        turnnumbers.remove(x)
+    gamenumbers=allfeathers.copy()
+    for ids in game['players']:
+        x=random.choice(gamenumbers)
+        game['players']['feather']=x
+        gamenumbers.remove(x)
+    for ids in game['players']:
+        text='Числа игроков:\n\n'
+        for idss in game['players']:
+            if game['players'][idss]!=game['players'][ids]:
+                text+=game['players'][idss]['name']+': '+game['players'][idss]['feather']+'\n'
+        bot.send_message(game['players'][ids]['id'], text)
+        
+    turn(game)
+    
+
+def turn(game):
+    game['currentplayer']+=1
+    if game['currentplayer']>len(game['players']):
+        game['currentplayer']=1
+    for ids in game['players']:
+        player=game['players'][ids]
+        if player['turnnumber']==game['currentplayer']:
+            cplayer=player
+    uname=cplayer['uname']
+    if uname!=None:
+        tx='('+cplayer['uname']+')'
+    else:
+        tx=''
+    bot.send_message(game['id'], 'Ход игрока '+cplayer['name']+tx+'!')
+    t=threading.Timer(game['turnlen'], nextturn, args=[game])
+    t.start()
+    game['timer']=t
+    
+
+def nextturn(game):
+    for ids in game['players']:
+        player=game['players'][ids]
+        if player['turnnumber']==game['currentplayer']:
+            cplayer=player
+    if cplayer['ready']==False:
+        game['currentnumber']+=1
+        game['lastplayer']=cplayer
+        bot.send_message(game['id'], 'Игрок '+cplayer['name']+' был АФК и автоматически назвал число на 1 больше: '+str(game['currentnumber'])+'!')
+    else:
+        bot.send_message(game['id'], cplayer['name']+ 'назвал число: '+str(game['currentnumber'])+'!')
+
+def createplayer(m):
+    return {m.from_user.id:{
+        'id':m.from_user.id,
+        'name':m.from_user.first_name,
+        'uname':m.from_user.username,
+        'axes':0,
+        'turnnumber':None,
+        'feather':None,
+        'ready':False
+    }
+           }
+
+def creategame(id, m):
+    return {id:{
+        'id':id,
+        'currentnumber':0,
+        'lastplayer':None,
+        'currentplayer':1,
+        'players':{},
+        'mymessage':m,
+        'started':False,
+        'timer':None,
+        'turnlen':100
+    }
+           }
+    
+   
+@bot.message_handler(commands=['stop'])
+def stopgame(m):
+    if m.chat.id in games:
+        if m.from_user.id in games[m.chat.id]['players']:
+            game=games[m.chat.id]
+            player=game['players'][m.from_user.id]
+            if player['turnnumber']==game['currentplayer']:
+                cplayer=player
+            else:
+                cplayer=None
+            if cplayer!=None:
+                game['timer'].cancel()
+                summ=0
+                alls=[]
+                for ids in game['players']:
+                    alls.append(game['players'][ids]['feather'])
+                maxf=-100
+                minf=100
+                for ids in alls:
+                    try:
+                        cnumber=int(ids)
+                        if cnumber>maxf:
+                            maxf=cnumber
+                        if cnumber<minf:
+                            minf=cnumber
+                    except:
+                        pass
+                if maxf==-100:
+                    maxf=0
+                if minf=100:
+                    minf=0
+                    
+
+
+
+@bot.message_handler(content_types=['text'])
+def texttttt(m):
+    if m.chat.id in games:
+        if m.from_user.id in games[m.chat.id]['players']:
+            game=games[m.chat.id]
+            player=game['players'][m.from_user.id]
+            if player['turnnumber']==game['currentplayer']:
+                cplayer=player
+            else:
+                cplayer=None
+            if cplayer!=None:
+                try:
+                    number=int(m.text)
+                    if number>game['currentnumber']:
+                        game['lastplayer']=cplayer
+                        game['currentnumber']=number
+                        game['timer'].cancel()
+                        cplayer['ready']=True
+                        nextturn(game)
+                    else:
+                        bot.send_message(m.chat.id, 'Нужно назвать число больше предыдущего или написать /stop!')
+                except:
+                    pass
+    
+    
 
 def medit(message_text,chat_id, message_id,reply_markup=None,parse_mode=None):
     return bot.edit_message_text(chat_id=chat_id,message_id=message_id,text=message_text,reply_markup=reply_markup,
