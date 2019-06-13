@@ -247,6 +247,7 @@ def count(game, m, listt=None):
             for ids in game['players']:
                 last=game['players'][ids]
             bot.send_message(game['id'], 'Последний оставшийся, и он же победитель: '+last['name']+'!')
+            del games[game['id']]
         
 
 
