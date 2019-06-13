@@ -97,6 +97,8 @@ def gostart(game):
     
 
 def turn(game):
+    for ids in game['players']:
+        game['players'][ids]['ready']=False
     game['currentplayer']+=1
     if game['currentplayer']>len(game['players']):
         game['currentplayer']=1
