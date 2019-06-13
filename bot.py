@@ -82,7 +82,7 @@ def gostart(game):
         gamenumbers=allfeathers.copy()
         for ids in game['players']:
             x=random.choice(gamenumbers)
-            game['players']['feather']=x
+            game['players'][ids]['feather']=x
             gamenumbers.remove(x)
         for ids in game['players']:
             text='Числа игроков:\n\n'
