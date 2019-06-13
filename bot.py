@@ -125,7 +125,8 @@ def nextturn(game):
         game['lastplayer']=cplayer
         bot.send_message(game['id'], 'Игрок '+cplayer['name']+' был АФК и автоматически назвал число на 1 больше: '+str(game['currentnumber'])+'!')
     else:
-        bot.send_message(game['id'], cplayer['name']+ 'назвал число: '+str(game['currentnumber'])+'!')
+        bot.send_message(game['id'], cplayer['name']+ ' назвал число: '+str(game['currentnumber'])+'!')
+    turn(game)
 
 def createplayer(m):
     return {m.from_user.id:{
