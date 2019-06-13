@@ -69,28 +69,31 @@ def startgame(m):
             
             
 def gostart(game):
-    turnnumbers=[]
-    i=1
-    while i<=len(game['players']):
-        turnnumbers.append(i)
-        i+=1
-    for ids in game['players']:
-        x=random.choice(turnnumbers)
-        game['players']['turnnumber']=x
-        turnnumbers.remove(x)
-    gamenumbers=allfeathers.copy()
-    for ids in game['players']:
-        x=random.choice(gamenumbers)
-        game['players']['feather']=x
-        gamenumbers.remove(x)
-    for ids in game['players']:
-        text='Числа игроков:\n\n'
-        for idss in game['players']:
-            if game['players'][idss]!=game['players'][ids]:
-                text+=game['players'][idss]['name']+': '+game['players'][idss]['feather']+'\n'
-        bot.send_message(game['players'][ids]['id'], text)
-        
-    turn(game)
+    try:
+        turnnumbers=[]
+        i=1
+        while i<=len(game['players']):
+            turnnumbers.append(i)
+            i+=1
+        for ids in game['players']:
+            x=random.choice(turnnumbers)
+            game['players']['turnnumber']=x
+            turnnumbers.remove(x)
+        gamenumbers=allfeathers.copy()
+        for ids in game['players']:
+            x=random.choice(gamenumbers)
+            game['players']['feather']=x
+            gamenumbers.remove(x)
+        for ids in game['players']:
+            text='Числа игроков:\n\n'
+            for idss in game['players']:
+                if game['players'][idss]!=game['players'][ids]:
+                    text+=game['players'][idss]['name']+': '+game['players'][idss]['feather']+'\n'
+            bot.send_message(game['players'][ids]['id'], text)
+            
+        turn(game)
+    except Exception as e:
+        bot.send_message(441399484, traceback.format_exc())
     
 
 def turn(game):
