@@ -71,7 +71,7 @@ def startgame(m):
 def delgamee(m):
   try:
     user=bot.get_chat_member(m.chat.id, m.from_user.id)       
-    if user['status']=='creator' or user['status']=='administrator':
+    if user.status=='creator' or user.status=='administrator':
         if m.chat.id in games:
             try:
                 games[m.chat.id]['timer'].cancel()
