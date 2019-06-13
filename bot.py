@@ -180,7 +180,7 @@ def count(game, listt=None):
                 pass
         if maxf==-100:
             maxf=0
-        if minf=100:
+        if minf==100:
             minf=0
         for ids in alls:
             try:
