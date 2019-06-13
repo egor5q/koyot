@@ -56,7 +56,6 @@ def startgame(m):
         game=games[m.chat.id]
         if len(game['players'])>1:
             game['started']=True
-            gostart(game)
             lst=''
             for ids in game['players']:
                 if game['players'][ids]['uname']!=None:
@@ -65,6 +64,8 @@ def startgame(m):
                     lst+=game['players'][ids]['name']+'\n'
             bot.send_message(game['id'], 'Каждый из игроков получил число! Каждый из вас видит числа остальных, но не видит своего числа!')
             bot.send_message(game['id'], 'Список игроков:\n'+lst)
+            t=threading.Thread(target=gostart, args=[game])
+            t.start()
             
             
 def gostart(game):
@@ -150,37 +151,104 @@ def creategame(id, m):
            }
     
    
+def count(game, listt=None):
+    player=game['players'][m.from_user.id]
+    if player['turnnumber']==game['currentplayer']:
+        cplayer=player
+    else:
+        cplayer=None
+    if cplayer!=None:
+        if listt==None:
+            game['timer'].cancel()
+        summ=0
+        alls=[]
+        if listt==None:
+            for ids in game['players']:
+                alls.append(game['players'][ids]['feather'])
+        else:
+            alls=listt
+        maxf=-100
+        minf=100
+        for ids in alls:
+            try:
+                cnumber=int(ids)
+                if cnumber>maxf:
+                    maxf=cnumber
+                if cnumber<minf:
+                    minf=cnumber
+            except:
+                pass
+        if maxf==-100:
+            maxf=0
+        if minf=100:
+            minf=0
+        for ids in alls:
+            try:
+                summ+=int(ids)
+            except:
+                pass
+        for ids in alls:
+            if ids=='max-':
+                summ-=maxf
+                summ-=maxf
+            if ids=='max0':
+                summ-=maxf
+            if ids=='?':
+                listt=alls
+                listt.remove('?')
+                l2=allfeathers.copy()
+                for ids in alls:
+                    l2.remove(ids)
+                new=random.choice(l2)
+                listt.append(new)
+                count(game, listt)
+                return 0
+        for ids in alls:
+            if ids=='x2':
+                summ=summ*2
+        if game['currentnumber']<=summ:
+            winner=game['lastplayer']
+            looser=cplayer
+        else:
+            winner=cplayer
+            looser=game['lastplayer']
+        pnums=''
+        for ids in game['players']:
+            pnums+=game['players'][ids]['name']+': '+game['players'][ids]['feather']+'\n'
+        bot.send_message(game['id'], 'Ведём подсчёт результатов, создаём интригу...')
+        time.sleep(3)
+        bot.send_message(game['id'], 'Итоговая сумма: '+str(summ)+'! Числа игроков:\n\n'+pnums)
+        bot.send_message(game['id'], 'Победитель: '+winner['name']+'! Проигравший: '+looser['name']+'! Второй получает топор.')
+        looser['axes']+=1
+        if looser['axes']>=3:
+            del game['players'][looser['id']]
+            bot.send_message(game['id'], looser['name']+' получил 3й топор и вылетел из игры!')
+        lives=''
+        for ids in game['players']:
+            lives+=game['players'][ids]['name']+': '+str(game['players'][ids]['axes'])+' топор(ов)\n'
+        bot.send_message('Оставшиеся игроки:\n\n'+lives)
+        if len(game['players'])>1:
+            game['currentnumber']=0
+            game['lastplayer']=None
+            game['currentplayer']=1
+            game['timer']=None
+            gostart(game)
+        else:
+            for ids in game['players']:
+                last=game['players'][ids]
+            bot.send_message(game['id'], 'Последний оставшийся, и он же победитель: '+last['name']+'!')
+        
+
+
 @bot.message_handler(commands=['stop'])
 def stopgame(m):
     if m.chat.id in games:
         if m.from_user.id in games[m.chat.id]['players']:
             game=games[m.chat.id]
-            player=game['players'][m.from_user.id]
-            if player['turnnumber']==game['currentplayer']:
-                cplayer=player
+            if game['lastplayer']!=None:
+                count(game)
             else:
-                cplayer=None
-            if cplayer!=None:
-                game['timer'].cancel()
-                summ=0
-                alls=[]
-                for ids in game['players']:
-                    alls.append(game['players'][ids]['feather'])
-                maxf=-100
-                minf=100
-                for ids in alls:
-                    try:
-                        cnumber=int(ids)
-                        if cnumber>maxf:
-                            maxf=cnumber
-                        if cnumber<minf:
-                            minf=cnumber
-                    except:
-                        pass
-                if maxf==-100:
-                    maxf=0
-                if minf=100:
-                    minf=0
+                bot.send_message(game['id'], 'Вы - первый игрок! Нельзя остановить игру, надо назвать число!')
                     
 
 
