@@ -59,7 +59,7 @@ def startgame(m):
             lst=''
             for ids in game['players']:
                 if game['players'][ids]['uname']!=None:
-                    lst+=game['players'][ids]['uname']+'\n'
+                    lst+='@'+game['players'][ids]['uname']+'\n'
                 else:
                     lst+=game['players'][ids]['name']+'\n'
             bot.send_message(game['id'], 'Каждый из игроков получил число! Каждый из вас видит числа остальных, но не видит своего числа!')
@@ -106,7 +106,7 @@ def turn(game):
             cplayer=player
     uname=cplayer['uname']
     if uname!=None:
-        tx='('+cplayer['uname']+')'
+        tx='(@'+cplayer['uname']+')'
     else:
         tx=''
     bot.send_message(game['id'], 'Ход игрока '+cplayer['name']+tx+'!')
