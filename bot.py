@@ -230,7 +230,7 @@ def count(game, m, listt=None):
         lives=''
         for ids in game['players']:
             lives+=game['players'][ids]['name']+': '+str(game['players'][ids]['axes'])+' топор(ов)\n'
-        bot.send_message('Оставшиеся игроки:\n\n'+lives)
+        bot.send_message(game['id'], 'Оставшиеся игроки:\n\n'+lives)
         if len(game['players'])>1:
             game['currentnumber']=0
             game['lastplayer']=None
