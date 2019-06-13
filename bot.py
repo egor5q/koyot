@@ -77,7 +77,7 @@ def gostart(game):
             i+=1
         for ids in game['players']:
             x=random.choice(turnnumbers)
-            game['players']['turnnumber']=x
+            game['players'][ids]['turnnumber']=x
             turnnumbers.remove(x)
         gamenumbers=allfeathers.copy()
         for ids in game['players']:
