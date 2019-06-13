@@ -155,7 +155,7 @@ def creategame(id, m):
            }
     
    
-def count(game, listt=None):
+def count(game, m, listt=None):
     player=game['players'][m.from_user.id]
     if player['turnnumber']==game['currentplayer']:
         cplayer=player
@@ -205,7 +205,7 @@ def count(game, listt=None):
                     l2.remove(ids)
                 new=random.choice(l2)
                 listt.append(new)
-                count(game, listt)
+                count(game, m, listt)
                 return 0
         for ids in alls:
             if ids=='x2':
@@ -250,7 +250,7 @@ def stopgame(m):
         if m.from_user.id in games[m.chat.id]['players']:
             game=games[m.chat.id]
             if game['lastplayer']!=None:
-                count(game)
+                count(game, m)
             else:
                 bot.send_message(game['id'], 'Вы - первый игрок! Нельзя остановить игру, надо назвать число!')
                     
