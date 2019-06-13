@@ -222,15 +222,19 @@ def count(game, m, listt=None):
         bot.send_message(game['id'], 'Ведём подсчёт результатов, создаём интригу...')
         time.sleep(3)
         bot.send_message(game['id'], 'Итоговая сумма: '+str(summ)+'! Числа игроков:\n\n'+pnums)
+        time.sleep(3)
         bot.send_message(game['id'], 'Победитель: '+winner['name']+'! Проигравший: '+looser['name']+'! Второй получает топор.')
+        time.sleep(3)
         looser['axes']+=1
         if looser['axes']>=3:
             del game['players'][looser['id']]
             bot.send_message(game['id'], looser['name']+' получил 3й топор и вылетел из игры!')
+            time.sleep(3)
         lives=''
         for ids in game['players']:
             lives+=game['players'][ids]['name']+': '+str(game['players'][ids]['axes'])+' топор(ов)\n'
         bot.send_message(game['id'], 'Оставшиеся игроки:\n\n'+lives)
+        time.sleep(3)
         if len(game['players'])>1:
             game['currentnumber']=0
             game['lastplayer']=None
