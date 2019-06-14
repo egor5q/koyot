@@ -168,7 +168,8 @@ def creategame(id, m):
         'mymessage':m,
         'started':False,
         'timer':None,
-        'turnlen':100
+        'turnlen':100,
+        'waiting':False
     }
            }
     
@@ -258,6 +259,7 @@ def count(game, m, listt=None):
             game['lastplayer']=None
             game['currentplayer']=1
             game['timer']=None
+            game['waiting']=False
             gostart(game)
         else:
             for ids in game['players']:
@@ -273,7 +275,9 @@ def stopgame(m):
         if m.from_user.id in games[m.chat.id]['players']:
             game=games[m.chat.id]
             if game['lastplayer']!=None:
-                count(game, m)
+                if game['waiting']==False:
+                    game['waiting']=True
+                    count(game, m)
             else:
                 bot.send_message(game['id'], 'Вы - первый игрок! Нельзя остановить игру, надо назвать число!')
                     
