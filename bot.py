@@ -296,6 +296,7 @@ def texttttt(m):
                 cplayer=None
             if cplayer!=None:
                 try:
+                  if game['waiting']==False:
                     number=int(m.text)
                     if number>game['currentnumber']:
                         game['lastplayer']=cplayer
