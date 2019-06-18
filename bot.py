@@ -216,6 +216,9 @@ def count(game, m, listt=None):
                 summ-=maxf
             if ids=='max0':
                 summ-=maxf
+                if 'max-' in alls:
+                    summ+=maxf
+                    summ+=maxf
             if ids=='?':
                 listt=alls
                 listt.remove('?')
