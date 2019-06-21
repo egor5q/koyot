@@ -279,8 +279,9 @@ def stopgame(m):
             game=games[m.chat.id]
             if game['lastplayer']!=None:
                 if game['waiting']==False:
-                    game['waiting']=True
-                    count(game, m)
+                    if game['lastplayer']['id']==m.from_user.id:
+                        game['waiting']=True
+                        count(game, m)
             else:
                 bot.send_message(game['id'], 'Вы - первый игрок! Нельзя остановить игру, надо назвать число!')
                     
