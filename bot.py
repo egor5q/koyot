@@ -279,7 +279,7 @@ def stopgame(m):
             game=games[m.chat.id]
             if game['lastplayer']!=None:
                 if game['waiting']==False:
-                    if game['lastplayer']['id']==m.from_user.id:
+                    if game['currentplayer']==game['players'][m.from_user.id]['turnnumber']:
                         game['waiting']=True
                         count(game, m)
             else:
